@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary -->
+    <color name="accent_blue">#6C63FF</color>
+    <color name="accent_blue_dark">#5A52E0</color>
+
+    <!-- Results -->
+    <color name="spam_red">#FF4D6A</color>
+    <color name="spam_background">#1A0A0F</color>
+    <color name="normal_green">#4AEDC4</color>
+    <color name="normal_background">#0A1A15</color>
+
+    <!-- Surfaces -->
+    <color name="background_dark">#0D0D1A</color>
+    <color name="card_dark">#1C1C3A</color>
+    <color name="card_dark_elevated">#252550</color>
+
+    <!-- Text -->
+    <color name="white">#FFFFFF</color>
+    <color name="text_subtitle">#B0B0CC</color>
+    <color name="text_hint">#6E6E8A</color>
+    <color name="ripple_color">#336C63FF</color>
+
+    <!-- Status bar -->
+    <color name="status_bar">#0D0D1A</color>
+</resources>
