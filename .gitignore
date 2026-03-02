@@ -1,0 +1,22 @@
+# Virtual environments
+spam_env/
+.venv/
+
+# Model files (too large for git)
+*.h5
+*.tflite
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Training outputs
+training_history.png
