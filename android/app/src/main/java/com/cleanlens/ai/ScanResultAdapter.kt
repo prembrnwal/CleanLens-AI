@@ -73,7 +73,9 @@ class ScanResultAdapter(
             holder.dupeBadge.visibility = View.GONE
         }
 
-        // Checkbox
+        // Checkbox — IMPORTANT: remove listener BEFORE setting checked state
+        // to prevent the recycled view's listener from firing on wrong items
+        holder.checkbox.setOnCheckedChangeListener(null)
         holder.checkbox.isChecked = image.isSelected
         holder.checkbox.setOnCheckedChangeListener { _, isChecked ->
             image.isSelected = isChecked
