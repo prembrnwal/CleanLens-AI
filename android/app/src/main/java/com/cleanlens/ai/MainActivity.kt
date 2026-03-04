@@ -1,9 +1,9 @@
 package com.cleanlens.ai
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -62,6 +62,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ── Storage Permission for Gallery Scan ──
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            launchScanActivity()
+        } else {
+            Toast.makeText(this, "Storage permission is required to scan gallery", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -78,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         binding.resultCard.visibility = View.GONE
         binding.imageCard.visibility = View.GONE
 
-        // Gallery button
+        // Gallery button (single image)
         binding.btnGallery.setOnClickListener {
             galleryLauncher.launch("image/*")
         }
@@ -94,10 +105,39 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Scan Gallery button (full scan)
+        binding.btnScanGallery.setOnClickListener {
+            requestStorageAndScan()
+        }
+
         // Scan another button
         binding.btnScanAnother.setOnClickListener {
             resetUI()
         }
+    }
+
+    /**
+     * Request storage permission and launch the full gallery scanner.
+     */
+    private fun requestStorageAndScan() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(this, permission)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            launchScanActivity()
+        } else {
+            storagePermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun launchScanActivity() {
+        val intent = Intent(this, ScanActivity::class.java)
+        startActivity(intent)
     }
 
     private fun launchCamera() {
