@@ -57,22 +57,22 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     val storageSaveable: LiveData<Long> = _storageSaveable
 
     /**
-     * Start the scan pipeline for a specific folder:
-     *  1. Query images from the selected folder
+     * Start the scan pipeline for one or more folders:
+     *  1. Query images from all selected folders
      *  2. Run CNN spam detection on each
      *  3. Run OCR text detection on each
      *  4. Detect duplicates (MD5 + pHash)
      *  5. Calculate combined spam scores
      *
-     * @param folderPath The folder to scan for spam images.
+     * @param folderPaths List of folders to scan for spam images.
      */
-    fun startScan(folderPath: String) {
+    fun startScan(folderPaths: List<String>) {
         viewModelScope.launch {
             _scanState.value = ScanState.Scanning
 
             withContext(Dispatchers.IO) {
-                // Step 1: Get images from selected folder
-                val allImages = galleryScanner.getImagesFromFolder(folderPath)
+                // Step 1: Get images from all selected folders
+                val allImages = galleryScanner.getImagesFromFolders(folderPaths)
                 _totalImages.postValue(allImages.size)
 
                 if (allImages.isEmpty()) {

@@ -137,8 +137,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Show a dialog listing all image folders on the device.
-     * User picks which folder to scan for spam.
+     * Show a multi-select dialog listing all image folders on the device.
+     * User can check multiple folders to scan them all at once.
      */
     private fun showFolderPicker() {
         val scanner = GalleryScanner(this)
@@ -156,15 +156,41 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Build folder list with image counts
-                val folderNames = folders.map { folder ->
+                val folderLabels = folders.map { folder ->
                     "📁 ${folder.name}  (${folder.imageCount} images, ${folder.sizeFormatted})"
                 }.toTypedArray()
 
+                // Track which folders are checked
+                val checkedItems = BooleanArray(folders.size) { false }
+
                 AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-                    .setTitle("📂 Select folder to scan")
-                    .setItems(folderNames) { _, which ->
-                        val selectedFolder = folders[which]
-                        launchScanActivity(selectedFolder.path, selectedFolder.name)
+                    .setTitle("📂 Select folders to scan")
+                    .setMultiChoiceItems(folderLabels, checkedItems) { _, which, isChecked ->
+                        checkedItems[which] = isChecked
+                    }
+                    .setPositiveButton("Scan Selected") { _, _ ->
+                        val selectedPaths = ArrayList<String>()
+                        val selectedNames = ArrayList<String>()
+
+                        for (i in folders.indices) {
+                            if (checkedItems[i]) {
+                                selectedPaths.add(folders[i].path)
+                                selectedNames.add(folders[i].name)
+                            }
+                        }
+
+                        if (selectedPaths.isEmpty()) {
+                            Toast.makeText(this, "No folders selected", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val totalImages = folders.filterIndexed { i, _ -> checkedItems[i] }
+                                .sumOf { it.imageCount }
+                            Toast.makeText(
+                                this,
+                                "Scanning ${selectedPaths.size} folders ($totalImages images)...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            launchScanActivity(selectedPaths, selectedNames)
+                        }
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
@@ -172,10 +198,10 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    private fun launchScanActivity(folderPath: String, folderName: String) {
+    private fun launchScanActivity(folderPaths: ArrayList<String>, folderNames: ArrayList<String>) {
         val intent = Intent(this, ScanActivity::class.java).apply {
-            putExtra(ScanActivity.EXTRA_FOLDER_PATH, folderPath)
-            putExtra(ScanActivity.EXTRA_FOLDER_NAME, folderName)
+            putStringArrayListExtra(ScanActivity.EXTRA_FOLDER_PATHS, folderPaths)
+            putStringArrayListExtra(ScanActivity.EXTRA_FOLDER_NAMES, folderNames)
         }
         startActivity(intent)
     }

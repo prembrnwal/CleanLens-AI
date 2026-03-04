@@ -23,14 +23,14 @@ import com.cleanlens.ai.databinding.ActivityScanBinding
 class ScanActivity : AppCompatActivity() {
 
     companion object {
-        const val EXTRA_FOLDER_PATH = "extra_folder_path"
-        const val EXTRA_FOLDER_NAME = "extra_folder_name"
+        const val EXTRA_FOLDER_PATHS = "extra_folder_paths"
+        const val EXTRA_FOLDER_NAMES = "extra_folder_names"
     }
 
     private lateinit var binding: ActivityScanBinding
     private lateinit var viewModel: ScanViewModel
     private lateinit var adapter: ScanResultAdapter
-    private var folderPath: String = ""
+    private var folderPaths: List<String> = emptyList()
 
     // For Android 11+ system trash / delete request
     private val trashRequestLauncher = registerForActivityResult(
@@ -39,7 +39,7 @@ class ScanActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             Toast.makeText(this, "✅ Moved to Recently Deleted!", Toast.LENGTH_SHORT).show()
             // Re-scan after trashing
-            viewModel.startScan(folderPath)
+            viewModel.startScan(folderPaths)
         }
     }
 
@@ -48,9 +48,9 @@ class ScanActivity : AppCompatActivity() {
         binding = ActivityScanBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Get folder from intent
-        folderPath = intent.getStringExtra(EXTRA_FOLDER_PATH) ?: ""
-        val folderName = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: "Gallery"
+        // Get folders from intent
+        folderPaths = intent.getStringArrayListExtra(EXTRA_FOLDER_PATHS) ?: emptyList()
+        val folderNames = intent.getStringArrayListExtra(EXTRA_FOLDER_NAMES) ?: emptyList()
 
         viewModel = ViewModelProvider(this)[ScanViewModel::class.java]
 
@@ -58,9 +58,9 @@ class ScanActivity : AppCompatActivity() {
         setupButtons()
         observeViewModel()
 
-        // Auto-start scan on the selected folder
-        if (folderPath.isNotEmpty()) {
-            viewModel.startScan(folderPath)
+        // Auto-start scan on selected folders
+        if (folderPaths.isNotEmpty()) {
+            viewModel.startScan(folderPaths)
         }
     }
 
@@ -230,7 +230,7 @@ class ScanActivity : AppCompatActivity() {
                     if (rows > 0) deletedCount++
                 }
                 Toast.makeText(this, "✅ Deleted $deletedCount images", Toast.LENGTH_SHORT).show()
-                viewModel.startScan(folderPath)
+                viewModel.startScan(folderPaths)
             }
         } catch (e: Exception) {
             e.printStackTrace()

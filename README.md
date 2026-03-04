@@ -289,7 +289,7 @@ python predict.py path/to/image.jpg
 - [x] Smart spam scoring system
 - [x] Move to Trash (native Android)
 - [ ] Face detection (protect family photos)
-- [ ] Batch scan multiple folders
+- [x] Batch scan multiple folders
 - [ ] Scan history / statistics dashboard
 - [ ] Model comparison (MobileNet vs EfficientNet)
 

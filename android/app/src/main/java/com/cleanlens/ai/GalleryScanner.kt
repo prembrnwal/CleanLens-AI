@@ -137,4 +137,17 @@ class GalleryScanner(private val context: Context) {
 
         return images
     }
+
+    /**
+     * Query images from multiple folders at once.
+     * @param folderPaths List of folder paths to scan.
+     * @return Combined list of ScannedImage from all folders.
+     */
+    fun getImagesFromFolders(folderPaths: List<String>): List<ScannedImage> {
+        val allImages = mutableListOf<ScannedImage>()
+        for (path in folderPaths) {
+            allImages.addAll(getImagesFromFolder(path))
+        }
+        return allImages
+    }
 }
