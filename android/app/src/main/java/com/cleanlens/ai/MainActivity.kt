@@ -13,6 +13,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { granted: Boolean ->
         if (granted) {
-            launchScanActivity()
+            showFolderPicker()
         } else {
             Toast.makeText(this, "Storage permission is required to scan gallery", Toast.LENGTH_SHORT).show()
         }
@@ -117,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Request storage permission and launch the full gallery scanner.
+     * Request storage permission, then show folder picker.
      */
     private fun requestStorageAndScan() {
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -129,14 +130,53 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, permission)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            launchScanActivity()
+            showFolderPicker()
         } else {
             storagePermissionLauncher.launch(permission)
         }
     }
 
-    private fun launchScanActivity() {
-        val intent = Intent(this, ScanActivity::class.java)
+    /**
+     * Show a dialog listing all image folders on the device.
+     * User picks which folder to scan for spam.
+     */
+    private fun showFolderPicker() {
+        val scanner = GalleryScanner(this)
+
+        // Show loading toast
+        Toast.makeText(this, "Loading folders...", Toast.LENGTH_SHORT).show()
+
+        Thread {
+            val folders = scanner.getImageFolders()
+
+            runOnUiThread {
+                if (folders.isEmpty()) {
+                    Toast.makeText(this, "No image folders found", Toast.LENGTH_SHORT).show()
+                    return@runOnUiThread
+                }
+
+                // Build folder list with image counts
+                val folderNames = folders.map { folder ->
+                    "📁 ${folder.name}  (${folder.imageCount} images, ${folder.sizeFormatted})"
+                }.toTypedArray()
+
+                AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+                    .setTitle("📂 Select folder to scan")
+                    .setItems(folderNames) { _, which ->
+                        val selectedFolder = folders[which]
+                        launchScanActivity(selectedFolder.path, selectedFolder.name)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        }.start()
+    }
+
+    private fun launchScanActivity(folderPath: String, folderName: String) {
+        val intent = Intent(this, ScanActivity::class.java).apply {
+            putExtra(ScanActivity.EXTRA_FOLDER_PATH, folderPath)
+            putExtra(ScanActivity.EXTRA_FOLDER_NAME, folderName)
+        }
         startActivity(intent)
     }
 

@@ -22,9 +22,15 @@ import com.cleanlens.ai.databinding.ActivityScanBinding
  */
 class ScanActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_FOLDER_PATH = "extra_folder_path"
+        const val EXTRA_FOLDER_NAME = "extra_folder_name"
+    }
+
     private lateinit var binding: ActivityScanBinding
     private lateinit var viewModel: ScanViewModel
     private lateinit var adapter: ScanResultAdapter
+    private var folderPath: String = ""
 
     // For Android 11+ scoped storage delete request
     private val deleteRequestLauncher = registerForActivityResult(
@@ -33,7 +39,7 @@ class ScanActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             Toast.makeText(this, "✅ Images deleted successfully!", Toast.LENGTH_SHORT).show()
             // Re-scan after deletion
-            viewModel.startScan()
+            viewModel.startScan(folderPath)
         }
     }
 
@@ -42,14 +48,20 @@ class ScanActivity : AppCompatActivity() {
         binding = ActivityScanBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Get folder from intent
+        folderPath = intent.getStringExtra(EXTRA_FOLDER_PATH) ?: ""
+        val folderName = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: "Gallery"
+
         viewModel = ViewModelProvider(this)[ScanViewModel::class.java]
 
         setupRecyclerView()
         setupButtons()
         observeViewModel()
 
-        // Auto-start scan
-        viewModel.startScan()
+        // Auto-start scan on the selected folder
+        if (folderPath.isNotEmpty()) {
+            viewModel.startScan(folderPath)
+        }
     }
 
     private fun setupRecyclerView() {
@@ -206,7 +218,7 @@ class ScanActivity : AppCompatActivity() {
                     if (rows > 0) deletedCount++
                 }
                 Toast.makeText(this, "✅ Deleted $deletedCount images", Toast.LENGTH_SHORT).show()
-                viewModel.startScan() // Re-scan
+                viewModel.startScan(folderPath) // Re-scan
             }
         } catch (e: Exception) {
             e.printStackTrace()
