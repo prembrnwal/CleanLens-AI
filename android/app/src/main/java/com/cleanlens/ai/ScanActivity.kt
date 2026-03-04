@@ -31,15 +31,14 @@ class ScanActivity : AppCompatActivity() {
     private lateinit var viewModel: ScanViewModel
     private lateinit var adapter: ScanResultAdapter
     private var folderPath: String = ""
-    private lateinit var trashManager: TrashManager
 
-    // For Android 11+ scoped storage delete request
-    private val deleteRequestLauncher = registerForActivityResult(
+    // For Android 11+ system trash / delete request
+    private val trashRequestLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "✅ Images deleted successfully!", Toast.LENGTH_SHORT).show()
-            // Re-scan after deletion
+            Toast.makeText(this, "✅ Moved to Recently Deleted!", Toast.LENGTH_SHORT).show()
+            // Re-scan after trashing
             viewModel.startScan(folderPath)
         }
     }
@@ -54,10 +53,6 @@ class ScanActivity : AppCompatActivity() {
         val folderName = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: "Gallery"
 
         viewModel = ViewModelProvider(this)[ScanViewModel::class.java]
-        trashManager = TrashManager(this)
-
-        // Auto-purge expired trash items on launch
-        trashManager.autoPurgeExpired()
 
         setupRecyclerView()
         setupButtons()
@@ -208,33 +203,38 @@ class ScanActivity : AppCompatActivity() {
     }
 
     /**
-     * Move selected images to the Recently Deleted (trash) folder.
-     * Images are copied to app storage first, then removed from gallery.
+     * Move selected images to the system's Recently Deleted folder.
+     * Uses MediaStore.createTrashRequest on Android 11+ which sends
+     * images to the Gallery app's built-in "Recently Deleted" section.
+     * On older Android, falls back to direct deletion.
      */
+    @Suppress("DEPRECATION")
     private fun moveSelectedToTrash(images: List<ScannedImage>) {
-        Thread {
-            var trashedCount = 0
-            for (image in images) {
-                val success = trashManager.moveToTrash(
-                    uri = image.uri,
-                    originalName = image.name,
-                    originalSize = image.size
+        try {
+            val uris = images.map { it.uri }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // Android 11+ — use system trash (goes to Gallery's Recently Deleted)
+                val pendingIntent = MediaStore.createTrashRequest(
+                    contentResolver,
+                    uris,
+                    true  // isTrashed = true → move to trash
                 )
-                if (success) trashedCount++
-            }
-
-            val trashCount = trashManager.getTrashCount()
-
-            runOnUiThread {
-                Toast.makeText(
-                    this,
-                    "✅ Moved $trashedCount images to Recently Deleted\n📁 $trashCount items in trash",
-                    Toast.LENGTH_LONG
-                ).show()
-
-                // Re-scan the folder
+                val request = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+                trashRequestLauncher.launch(request)
+            } else {
+                // Android 10 and below — no system trash, delete directly
+                var deletedCount = 0
+                for (image in images) {
+                    val rows = contentResolver.delete(image.uri, null, null)
+                    if (rows > 0) deletedCount++
+                }
+                Toast.makeText(this, "✅ Deleted $deletedCount images", Toast.LENGTH_SHORT).show()
                 viewModel.startScan(folderPath)
             }
-        }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "❌ Error moving images to trash", Toast.LENGTH_SHORT).show()
+        }
     }
 }

@@ -111,75 +111,10 @@ class MainActivity : AppCompatActivity() {
             requestStorageAndScan()
         }
 
-        // Recently Deleted button
-        binding.btnRecentlyDeleted.setOnClickListener {
-            showRecentlyDeleted()
-        }
-
         // Scan another button
         binding.btnScanAnother.setOnClickListener {
             resetUI()
         }
-    }
-
-    /**
-     * Show the Recently Deleted (trash) dialog.
-     * Users can restore or permanently delete trashed images.
-     */
-    private fun showRecentlyDeleted() {
-        val trashManager = TrashManager(this)
-        val trashedImages = trashManager.getTrashedImages()
-
-        if (trashedImages.isEmpty()) {
-            Toast.makeText(this, "🗑 Trash is empty", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Build list items
-        val items = trashedImages.map { image ->
-            "📷 ${image.originalName}\n   ${image.sizeFormatted} • ${image.deletedDateFormatted} • ${image.daysRemaining} days left"
-        }.toTypedArray()
-
-        val trashSize = trashManager.getTrashSize()
-        val trashMb = trashSize / (1024.0 * 1024.0)
-        val title = "🗑 Recently Deleted (${trashedImages.size} items, ${String.format("%.1f MB", trashMb)})"
-
-        AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-            .setTitle(title)
-            .setItems(items) { _, which ->
-                val selected = trashedImages[which]
-                // Show restore/delete options for selected item
-                AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-                    .setTitle(selected.originalName)
-                    .setMessage("${selected.sizeFormatted} • Deleted ${selected.deletedDateFormatted}\n${selected.daysRemaining} days until permanent deletion")
-                    .setPositiveButton("↩ Restore") { _, _ ->
-                        val restored = trashManager.restoreFromTrash(selected)
-                        if (restored) {
-                            Toast.makeText(this, "✅ Restored to Pictures/Restored", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this, "❌ Failed to restore", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .setNegativeButton("🗑 Delete Forever") { _, _ ->
-                        trashManager.permanentlyDelete(selected)
-                        Toast.makeText(this, "Permanently deleted", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNeutralButton("Cancel", null)
-                    .show()
-            }
-            .setPositiveButton("🗑 Empty Trash") { _, _ ->
-                AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-                    .setTitle("Empty trash?")
-                    .setMessage("This will permanently delete all ${trashedImages.size} items. This cannot be undone.")
-                    .setPositiveButton("Delete All") { _, _ ->
-                        val count = trashManager.emptyTrash()
-                        Toast.makeText(this, "🗑 Permanently deleted $count items", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
-            }
-            .setNegativeButton("Close", null)
-            .show()
     }
 
     /**
