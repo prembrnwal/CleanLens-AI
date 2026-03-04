@@ -192,6 +192,18 @@ class MainActivity : AppCompatActivity() {
                             launchScanActivity(selectedPaths, selectedNames)
                         }
                     }
+                    .setNeutralButton("Select All") { _, _ ->
+                        // Select all folders and launch scan
+                        val allPaths = ArrayList(folders.map { it.path })
+                        val allNames = ArrayList(folders.map { it.name })
+                        val totalImages = folders.sumOf { it.imageCount }
+                        Toast.makeText(
+                            this,
+                            "Scanning all ${allPaths.size} folders ($totalImages images)...",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        launchScanActivity(allPaths, allNames)
+                    }
                     .setNegativeButton("Cancel", null)
                     .show()
             }
