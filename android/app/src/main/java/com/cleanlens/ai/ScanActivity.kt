@@ -31,6 +31,7 @@ class ScanActivity : AppCompatActivity() {
     private lateinit var viewModel: ScanViewModel
     private lateinit var adapter: ScanResultAdapter
     private var folderPath: String = ""
+    private lateinit var trashManager: TrashManager
 
     // For Android 11+ scoped storage delete request
     private val deleteRequestLauncher = registerForActivityResult(
@@ -53,6 +54,10 @@ class ScanActivity : AppCompatActivity() {
         val folderName = intent.getStringExtra(EXTRA_FOLDER_NAME) ?: "Gallery"
 
         viewModel = ViewModelProvider(this)[ScanViewModel::class.java]
+        trashManager = TrashManager(this)
+
+        // Auto-purge expired trash items on launch
+        trashManager.autoPurgeExpired()
 
         setupRecyclerView()
         setupButtons()
@@ -95,7 +100,7 @@ class ScanActivity : AppCompatActivity() {
             updateBottomBar()
         }
 
-        // Delete button
+        // Move to Trash button
         binding.btnDelete.setOnClickListener {
             val selected = viewModel.getSelectedImages()
             if (selected.isEmpty()) {
@@ -105,10 +110,10 @@ class ScanActivity : AppCompatActivity() {
 
             // Confirmation dialog
             AlertDialog.Builder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-                .setTitle("🗑 Delete ${selected.size} images?")
-                .setMessage("This will permanently delete the selected spam images. This action cannot be undone.")
-                .setPositiveButton("Delete") { _, _ ->
-                    deleteSelectedImages(selected)
+                .setTitle("🗑 Move ${selected.size} images to trash?")
+                .setMessage("Images will be moved to Recently Deleted and automatically removed after 30 days. You can restore them anytime before that.")
+                .setPositiveButton("Move to Trash") { _, _ ->
+                    moveSelectedToTrash(selected)
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -202,27 +207,34 @@ class ScanActivity : AppCompatActivity() {
         }
     }
 
-    private fun deleteSelectedImages(images: List<ScannedImage>) {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                // Android 11+ — use MediaStore delete request
-                val uris = images.map { it.uri }
-                val pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris)
-                val request = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-                deleteRequestLauncher.launch(request)
-            } else {
-                // Android 10 and below — delete directly
-                var deletedCount = 0
-                for (image in images) {
-                    val rows = contentResolver.delete(image.uri, null, null)
-                    if (rows > 0) deletedCount++
-                }
-                Toast.makeText(this, "✅ Deleted $deletedCount images", Toast.LENGTH_SHORT).show()
-                viewModel.startScan(folderPath) // Re-scan
+    /**
+     * Move selected images to the Recently Deleted (trash) folder.
+     * Images are copied to app storage first, then removed from gallery.
+     */
+    private fun moveSelectedToTrash(images: List<ScannedImage>) {
+        Thread {
+            var trashedCount = 0
+            for (image in images) {
+                val success = trashManager.moveToTrash(
+                    uri = image.uri,
+                    originalName = image.name,
+                    originalSize = image.size
+                )
+                if (success) trashedCount++
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "❌ Error deleting images", Toast.LENGTH_SHORT).show()
-        }
+
+            val trashCount = trashManager.getTrashCount()
+
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    "✅ Moved $trashedCount images to Recently Deleted\n📁 $trashCount items in trash",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                // Re-scan the folder
+                viewModel.startScan(folderPath)
+            }
+        }.start()
     }
 }
