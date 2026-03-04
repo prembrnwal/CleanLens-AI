@@ -13,17 +13,38 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:paddingTop="40dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="12dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:cardBackgroundColor="@color/card_dark"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/card_dark_elevated"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="🔍"
+                android:textSize="18sp" />
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🔍 Gallery Scan"
+            android:layout_marginStart="12dp"
+            android:text="Gallery Scan"
             android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectAll"
@@ -41,11 +62,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:visibility="gone"
         app:cardBackgroundColor="@color/card_dark"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="6dp"
+        app:strokeColor="@color/card_dark_elevated"
+        app:strokeWidth="1dp"
         tools:visibility="visible">
 
         <LinearLayout
@@ -53,7 +76,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="28dp">
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/scanProgressCircle"
@@ -62,7 +85,7 @@
                 android:indeterminate="false"
                 app:indicatorColor="@color/accent_blue"
                 app:indicatorSize="64dp"
-                app:trackColor="@color/card_dark_elevated"
+                app:trackColor="#1A4FD1C5"
                 app:trackThickness="6dp" />
 
             <TextView
@@ -70,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="Scanning 45 / 200 images..." />
@@ -97,8 +120,10 @@
         android:layout_marginTop="12dp"
         android:visibility="gone"
         app:cardBackgroundColor="@color/card_dark"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="6dp"
+        app:strokeColor="@color/card_dark_elevated"
+        app:strokeWidth="1dp"
         tools:visibility="visible">
 
         <LinearLayout
@@ -115,17 +140,27 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🚫"
-                    android:textSize="28sp" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="#1AFC8181"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="🚫"
+                        android:textSize="20sp" />
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:id="@+id/txtSpamCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:textColor="@color/spam_red"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -136,7 +171,7 @@
                     android:layout_height="wrap_content"
                     android:text="Spam"
                     android:textColor="@color/text_hint"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <!-- Divider -->
@@ -153,18 +188,28 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📋"
-                    android:textSize="28sp" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="#1AF6AD55"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="📋"
+                        android:textSize="20sp" />
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:id="@+id/txtDupeCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="#FF9800"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/warning_orange"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     tools:text="45" />
@@ -172,9 +217,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Duplicates"
+                    android:text="Dupes"
                     android:textColor="@color/text_hint"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <!-- Divider -->
@@ -191,17 +236,27 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💾"
-                    android:textSize="28sp" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="#1A68D391"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="💾"
+                        android:textSize="20sp" />
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:id="@+id/txtStorageSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:textColor="@color/normal_green"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -210,9 +265,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Saveable"
+                    android:text="Save"
                     android:textColor="@color/text_hint"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -250,7 +305,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Your gallery is clean!"
-            android:textColor="@color/normal_green"
+            android:textColor="@color/accent_blue"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -269,7 +324,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/card_dark_elevated"
+        app:cardBackgroundColor="@color/card_dark"
         app:cardCornerRadius="0dp"
         app:cardElevation="16dp"
         tools:visibility="visible">
@@ -279,7 +334,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
             <TextView
                 android:id="@+id/txtSelectedInfo"
@@ -296,7 +352,7 @@
                 android:layout_height="44dp"
                 android:text="🗑  Move to Trash"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/spam_red"
                 app:cornerRadius="22dp" />

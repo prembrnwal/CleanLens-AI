@@ -4,20 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="5dp"
     app:cardBackgroundColor="@color/card_dark"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="18dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/card_dark_elevated"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Image Thumbnail with overlay -->
+        <!-- Image Thumbnail with overlay badges -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="160dp">
+            android:layout_height="150dp">
 
             <ImageView
                 android:id="@+id/imgThumbnail"
@@ -25,6 +27,13 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 tools:background="@color/text_hint" />
+
+            <!-- Gradient overlay at bottom for text readability -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/thumbnail_gradient_overlay" />
 
             <!-- Spam Score Badge (top-right) -->
             <TextView
@@ -48,6 +57,17 @@
                 android:layout_margin="4dp"
                 android:buttonTint="@color/accent_blue" />
 
+            <!-- File size over image (bottom-left) -->
+            <TextView
+                android:id="@+id/txtFileSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="8dp"
+                android:textColor="#CCFFFFFF"
+                android:textSize="10sp"
+                tools:text="1.2 MB" />
+
         </FrameLayout>
 
         <!-- Info Section -->
@@ -55,15 +75,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:id="@+id/txtFileName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="middle"
+                android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="12sp"
                 tools:text="IMG_20240101_123456.jpg" />
 
@@ -75,19 +96,10 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/txtFileSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
-                    tools:text="1.2 MB" />
-
-                <TextView
                     android:id="@+id/txtOcrBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:textColor="@color/accent_blue"
+                    android:textColor="@color/accent_lavender"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:visibility="gone"
@@ -99,7 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:textColor="#FF9800"
+                    android:textColor="@color/warning_orange"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:visibility="gone"
