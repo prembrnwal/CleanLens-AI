@@ -22,6 +22,8 @@ Thumbs.db
 
 # Training outputs
 training_history.png
+dataset/
+evaluation_results/
 
 # Android build outputs
 android/.gradle/
