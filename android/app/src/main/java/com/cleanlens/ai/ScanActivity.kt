@@ -31,6 +31,7 @@ class ScanActivity : AppCompatActivity() {
     private lateinit var viewModel: ScanViewModel
     private lateinit var adapter: ScanResultAdapter
     private var folderPaths: List<String> = emptyList()
+    private var backPressedOnce = false
 
     // For Android 11+ system trash / delete request
     private val trashRequestLauncher = registerForActivityResult(
@@ -38,8 +39,25 @@ class ScanActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             Toast.makeText(this, "✅ Moved to Recently Deleted!", Toast.LENGTH_SHORT).show()
-            // Re-scan after trashing
             viewModel.startScan(folderPaths)
+        }
+    }
+
+    // For receiving selection state back from ImageViewerActivity
+    private var pendingViewerImage: ScannedImage? = null
+    private val imageViewerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == ImageViewerActivity.RESULT_SELECTION_CHANGED) {
+            val newState = result.data?.getBooleanExtra(
+                ImageViewerActivity.EXTRA_NEW_SELECTION_STATE, false
+            ) ?: false
+            pendingViewerImage?.let { img ->
+                img.isSelected = newState
+                adapter.notifyDataSetChanged()
+                updateBottomBar()
+            }
+            pendingViewerImage = null
         }
     }
 
@@ -71,6 +89,9 @@ class ScanActivity : AppCompatActivity() {
                 viewModel.toggleSelection(image)
                 updateBottomBar()
             },
+            onItemLongClick = { image ->
+                openImageViewer(image)
+            },
             onSelectionChanged = { _ ->
                 updateBottomBar()
             }
@@ -78,6 +99,22 @@ class ScanActivity : AppCompatActivity() {
 
         binding.recyclerResults.layoutManager = GridLayoutManager(this, 2)
         binding.recyclerResults.adapter = adapter
+    }
+
+    private fun openImageViewer(image: ScannedImage) {
+        pendingViewerImage = image
+        val scorePercent = (image.spamScore * 100).toInt()
+        val intent = Intent(this, ImageViewerActivity::class.java).apply {
+            putExtra(ImageViewerActivity.EXTRA_IMAGE_URI,   image.uri.toString())
+            putExtra(ImageViewerActivity.EXTRA_IMAGE_NAME,  image.name)
+            putExtra(ImageViewerActivity.EXTRA_IMAGE_SIZE,  image.sizeFormatted)
+            putExtra(ImageViewerActivity.EXTRA_SPAM_SCORE,  scorePercent)
+            putExtra(ImageViewerActivity.EXTRA_IS_SELECTED, image.isSelected)
+            putExtra(ImageViewerActivity.EXTRA_HAS_OCR,     image.ocrKeywordFound)
+            putExtra(ImageViewerActivity.EXTRA_IS_DUPE,     image.isDuplicate)
+        }
+        imageViewerLauncher.launch(intent)
+        overridePendingTransition(android.R.anim.fade_in, 0)
     }
 
     private fun setupButtons() {
@@ -236,5 +273,19 @@ class ScanActivity : AppCompatActivity() {
             e.printStackTrace()
             Toast.makeText(this, "❌ Error moving images to trash", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        if (backPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+
+        backPressedOnce = true
+        Toast.makeText(this, "Press back again to exit scan", Toast.LENGTH_SHORT).show()
+
+        // Reset flag after 2 seconds
+        binding.root.postDelayed({ backPressedOnce = false }, 2000)
     }
 }
