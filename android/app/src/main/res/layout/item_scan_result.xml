@@ -26,6 +26,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
+                android:clickable="true"
+                android:focusable="true"
                 tools:background="@color/text_hint" />
 
             <!-- Gradient overlay at bottom for text readability -->
@@ -35,13 +37,14 @@
                 android:layout_gravity="bottom"
                 android:background="@drawable/thumbnail_gradient_overlay" />
 
-            <!-- Spam Score Badge (top-right) -->
+            <!-- Spam Score Badge (top-left) -->
             <TextView
                 android:id="@+id/txtSpamBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
+                android:layout_gravity="top|start"
                 android:layout_margin="8dp"
+                android:layout_marginStart="36dp"
                 android:background="@drawable/badge_high_spam"
                 android:textColor="@color/white"
                 android:textSize="11sp"
@@ -67,6 +70,22 @@
                 android:textColor="#CCFFFFFF"
                 android:textSize="10sp"
                 tools:text="1.2 MB" />
+
+            <!-- ⛶ Fullscreen expand icon (bottom-right corner) -->
+            <TextView
+                android:id="@+id/btnExpand"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="6dp"
+                android:background="#99000000"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="⛶"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:padding="4dp" />
 
         </FrameLayout>
 

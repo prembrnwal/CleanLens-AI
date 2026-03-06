@@ -28,6 +28,7 @@ class ScanResultAdapter(
         val fileSize: TextView = itemView.findViewById(R.id.txtFileSize)
         val ocrBadge: TextView = itemView.findViewById(R.id.txtOcrBadge)
         val dupeBadge: TextView = itemView.findViewById(R.id.txtDupeBadge)
+        val btnExpand: TextView = itemView.findViewById(R.id.btnExpand)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -83,20 +84,25 @@ class ScanResultAdapter(
             onSelectionChanged(image)
         }
 
-        // Tap → toggle selection
+        // ── Expand icon → open full-screen viewer
+        holder.btnExpand.setOnClickListener {
+            onItemLongClick(image)
+        }
+
+        // ── Thumbnail tap → open full-screen viewer
+        holder.thumbnail.setOnClickListener {
+            onItemLongClick(image)
+        }
+
+        // ── Tap anywhere else on the card → toggle selection
         holder.itemView.setOnClickListener {
             onItemClick(image)
         }
 
-        // Long-press → open full-screen viewer
+        // ── Long-press anywhere → also open viewer
         holder.itemView.setOnLongClickListener {
             onItemLongClick(image)
             true
-        }
-
-        // Thumbnail tap → also open viewer
-        holder.thumbnail.setOnClickListener {
-            onItemLongClick(image)
         }
     }
 
