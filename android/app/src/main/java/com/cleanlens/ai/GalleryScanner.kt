@@ -150,4 +150,57 @@ class GalleryScanner(private val context: Context) {
         }
         return allImages
     }
+
+    /**
+     * Get combined media counts (Photos, Videos, Folders).
+     */
+    fun getMediaStats(): MediaStats {
+        var photoCount = 0
+        var videoCount = 0
+        val folders = mutableSetOf<String>()
+
+        try {
+            // Count Photos
+            context.contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Images.Media.DATA),
+                null, null, null
+            )?.use { cursor ->
+                photoCount = cursor.count
+                val pathCol = cursor.getColumnIndex(MediaStore.Images.Media.DATA)
+                if (pathCol != -1) {
+                    while (cursor.moveToNext()) {
+                        val path = cursor.getString(pathCol) ?: continue
+                        File(path).parent?.let { folders.add(it) }
+                    }
+                }
+            }
+
+            // Count Videos
+            context.contentResolver.query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Video.Media.DATA),
+                null, null, null
+            )?.use { cursor ->
+                videoCount = cursor.count
+                val pathCol = cursor.getColumnIndex(MediaStore.Video.Media.DATA)
+                if (pathCol != -1) {
+                    while (cursor.moveToNext()) {
+                        val path = cursor.getString(pathCol) ?: continue
+                        File(path).parent?.let { folders.add(it) }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return MediaStats(photoCount, videoCount, folders.size)
+    }
+
+    data class MediaStats(
+        val totalPhotos: Int,
+        val totalVideos: Int,
+        val totalFolders: Int
+    )
 }

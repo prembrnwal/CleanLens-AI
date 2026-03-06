@@ -16,6 +16,7 @@ import coil.load
 class ScanResultAdapter(
     private var images: List<ScannedImage> = emptyList(),
     private val onItemClick: (ScannedImage) -> Unit,
+    private val onItemLongClick: (ScannedImage) -> Unit,
     private val onSelectionChanged: (ScannedImage) -> Unit,
 ) : RecyclerView.Adapter<ScanResultAdapter.ViewHolder>() {
 
@@ -82,9 +83,20 @@ class ScanResultAdapter(
             onSelectionChanged(image)
         }
 
-        // Click listener
+        // Tap → toggle selection
         holder.itemView.setOnClickListener {
             onItemClick(image)
+        }
+
+        // Long-press → open full-screen viewer
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick(image)
+            true
+        }
+
+        // Thumbnail tap → also open viewer
+        holder.thumbnail.setOnClickListener {
+            onItemLongClick(image)
         }
     }
 
